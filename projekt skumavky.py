@@ -113,7 +113,13 @@ def new_game():
     for i in range(skumavky):
         game.skumavky.append(Magazine())
 
-    lopty = [cervena]*gulicky + [zelena]*gulicky + [modra]*gulicky
+    lopty = []
+    farby = [cervena, zelena, modra, cierna, fialova, cyan, zlta]
+    for f in range(n_farby):
+        farb = choice(farby)
+        farby.remove(farb)
+        for g in range(gulicky):
+            lopty.append(farb)
     shuffle(lopty)
     for i in lopty:
         choice(list(filter(lambda x: x.len < 6, game.skumavky))).add(1, i)
@@ -125,12 +131,12 @@ def more_skumaviek():
 
 def less_skumaviek():
     global skumavky
-    if skumavky > 3:
+    if skumavky > 3 and n_farby*gulicky < skumavky*5 - 5:
         skumavky -= 1
 
 def more_guliciek():
     global gulicky
-    if gulicky < 6:
+    if gulicky < 6 and n_farby*gulicky < skumavky*5 - 5:
         gulicky += 1
 
 def less_guliciek():
@@ -138,8 +144,20 @@ def less_guliciek():
     if gulicky > 2:
         gulicky -= 1
 
+def more_farby():
+    global n_farby
+    if n_farby < 7 and n_farby*gulicky < skumavky*5 - 5:
+        n_farby += 1
+
+def less_farby():
+    global n_farby
+    if n_farby > 2:
+        n_farby -= 1
+
+
 skumavky = 4
 gulicky = 5
+n_farby = 3
 
 font = pygame.font.Font(None, 50)
 font_m = pygame.font.Font(None, 20)
@@ -153,15 +171,26 @@ less_skumavky_button = Button(150, 10, 50, 50, sipka_left, (80, 80, 220), less_s
 more_skumavky_button = Button(250, 10, 50, 50, sipka_right, (80, 80, 220), more_skumaviek)
 less_gulicky_button = Button(350, 10, 50, 50, sipka_left, (80, 80, 220), less_guliciek)
 more_gulicky_button = Button(450, 10, 50, 50, sipka_right, (80, 80, 220), more_guliciek)
+less_farby_button = Button(350, 440, 50, 50, sipka_left, (80, 80, 220), less_farby)
+more_farby_button = Button(450, 440, 50, 50, sipka_right, (80, 80, 220), more_farby)
 buttons.append(new_game_button)
 buttons.append(less_skumavky_button)
 buttons.append(more_skumavky_button)
 buttons.append(less_gulicky_button)
 buttons.append(more_gulicky_button)
+buttons.append(less_farby_button)
+buttons.append(more_farby_button)
+
 
 cervena = pygame.Color(200, 0, 0)
 zelena = pygame.Color(0, 200, 0)
 modra = pygame.Color(0, 0, 200)
+cierna = pygame.Color(10, 10, 10)
+fialova = pygame.Color(139, 72, 181)
+cyan = pygame.Color(0, 181, 162)
+zlta = pygame.Color(181, 175, 0)
+farby = [cervena, zelena, modra, cierna, fialova, cyan, zlta]
+
 
 new_game()
 
@@ -179,6 +208,7 @@ while running:
     screen.blit(font_m.render("skumavky", False, (255, 255, 255)), (195, 65))
     screen.blit(font.render(str(gulicky), False, (255, 255, 255)), (415, 20))
     screen.blit(font_m.render("gulicky", False, (255, 255, 255)), (395, 65))
+    screen.blit(font.render(str(n_farby), False, (255, 255, 255)), (415, 450))
 
 
     for event in pygame.event.get():
