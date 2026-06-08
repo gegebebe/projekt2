@@ -39,6 +39,19 @@ class Magazine:
             self.start = Node(data, self.start)
             self.len += 1
 
+    def prejdi(self):
+        curr = self.start
+        n = 0
+        if self.start:
+            first_color = curr.data
+            while curr is not None:
+                if curr.data != first_color:
+                    return n
+                n += 1
+                curr = curr.next
+        return n
+
+
 
 
 # HRA
@@ -48,6 +61,7 @@ class Game:
         self.skumavky: list[Magazine] = []
         self.turn = 0
         self.ozn = 1000
+        self.time = time()
 
     def nakresli(self):
         pygame.draw.rect(screen, (250, 250, 250), [42 + self.ozn*70, 97, 56, 306])
@@ -67,12 +81,22 @@ class Game:
                     if self.ozn != new:
                         self.skumavky[new].add(*self.skumavky[self.ozn].pop(limit = 6-self.skumavky[new].len))
                         self.ozn = 1000
+                        self.turn += 1
                     else:
                         self.ozn = 1000
                 else:
                     self.ozn = new
             else:
                 self.ozn = 1000
+
+    def check_win(self):
+        for skum in self.skumavky:
+            n = skum.prejdi()
+            if n != gulicky and n != 0:
+                return False
+        return True
+        
+            
 
 
 # Button
@@ -109,12 +133,14 @@ class Button:
 
 def new_game():
     global game
+    global confetti
     game = Game()
     for i in range(skumavky):
         game.skumavky.append(Magazine())
 
     lopty = []
     farby = [cervena, zelena, modra, cierna, fialova, cyan, zlta]
+    confetti = [pygame.draw.rect(screen, choice(farby), [randint(-50, 700), randint(100, 200), 20, 4])]*100
     for f in range(n_farby):
         farb = choice(farby)
         farby.remove(farb)
@@ -154,12 +180,13 @@ def less_farby():
     if n_farby > 2:
         n_farby -= 1
 
-
+game = Game()
 skumavky = 4
 gulicky = 5
 n_farby = 3
 
 font = pygame.font.Font(None, 50)
+font_b = pygame.font.Font(None, 52)
 font_m = pygame.font.Font(None, 20)
 sipka_left = pygame.image.load("sipka nalavo.png")
 sipka_right = pygame.image.load("sipka napravo.png")
@@ -210,17 +237,27 @@ while running:
     screen.blit(font_m.render("gulicky", False, (255, 255, 255)), (403, 65))
     screen.blit(font.render(str(n_farby), False, (255, 255, 255)), (415, 450))
     screen.blit(font_m.render("farby", False, (255, 255, 255)), (407, 425))
+    screen.blit(font_m.render("turns: " + str(game.turn), False, (255, 255, 255)), (550, 45))
+    screen.blit(font_m.render("time: " + str(int(time() - game.time)), False, (255, 255, 255)), (550, 65))
 
+    if game.check_win():
+        #rekord = int(time() - game.time)
+        #game.time = time() - (time() - rekord)
+        screen.blit(font.render("YOU WON!!!", False, (200, 200, 50)), (250, 225))
+        screen.blit(font_b.render("YOU WON!!!", False, (10, 10, 10)), (248, 224))
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
 
-        if pygame.mouse.get_pressed()[0] and time() > cas_od_klik + 0.1:
-            poz = pygame.mouse.get_pos()
-            game.oznac(poz)
-            cas_od_klik = time()
-        
+        if not game.check_win():
+            if pygame.mouse.get_pressed()[0] and time() > cas_od_klik + 0.1:
+                poz = pygame.mouse.get_pos()
+                game.oznac(poz)
+                cas_od_klik = time()
+        else:
+            pass
+                
 
 
 
