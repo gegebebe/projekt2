@@ -207,8 +207,9 @@ while running:
     screen.blit(font.render(str(skumavky), False, (255, 255, 255)), (215, 20))
     screen.blit(font_m.render("skumavky", False, (255, 255, 255)), (195, 65))
     screen.blit(font.render(str(gulicky), False, (255, 255, 255)), (415, 20))
-    screen.blit(font_m.render("gulicky", False, (255, 255, 255)), (395, 65))
+    screen.blit(font_m.render("gulicky", False, (255, 255, 255)), (403, 65))
     screen.blit(font.render(str(n_farby), False, (255, 255, 255)), (415, 450))
+    screen.blit(font_m.render("farby", False, (255, 255, 255)), (407, 425))
 
 
     for event in pygame.event.get():
