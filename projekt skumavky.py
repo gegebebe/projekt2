@@ -15,7 +15,7 @@ class Node:
 
 class Magazine:
     def __init__(self):
-        self.start: Node = None
+        self.start: Node | None = None
         self.len = 0
 
     def pop(self, limit = 6):
@@ -46,7 +46,7 @@ class Magazine:
             first_color = curr.data
             while curr is not None:
                 if curr.data != first_color:
-                    return n
+                    return 15
                 n += 1
                 curr = curr.next
         return n
@@ -57,11 +57,12 @@ class Magazine:
 # HRA
 
 class Game:
-    def __init__(self):
+    def __init__(self, gulicky = 5):
         self.skumavky: list[Magazine] = []
         self.turn = 0
         self.ozn = 1000
         self.time = time()
+        self.n_gulicky = gulicky
 
     def nakresli(self):
         pygame.draw.rect(screen, (250, 250, 250), [42 + self.ozn*70, 97, 56, 306])
@@ -89,11 +90,14 @@ class Game:
             else:
                 self.ozn = 1000
 
-    def check_win(self):
+    def check_win(self, ):
+        global rekord
         for skum in self.skumavky:
             n = skum.prejdi()
-            if n != gulicky and n != 0:
+            if n != self.n_gulicky and n != 0:
                 return False
+        if rekord == 999:
+            rekord = int(time() - self.time)
         return True
         
             
@@ -133,18 +137,18 @@ class Button:
 
 def new_game():
     global game
-    global confetti
-    game = Game()
+    global rekord
+    rekord = 999
+    game = Game(gulicky)
     for i in range(skumavky):
         game.skumavky.append(Magazine())
 
     lopty = []
     farby = [cervena, zelena, modra, cierna, fialova, cyan, zlta]
-    confetti = [pygame.draw.rect(screen, choice(farby), [randint(-50, 700), randint(100, 200), 20, 4])]*100
     for f in range(n_farby):
         farb = choice(farby)
         farby.remove(farb)
-        for g in range(gulicky):
+        for g in range(game.n_gulicky):
             lopty.append(farb)
     shuffle(lopty)
     for i in lopty:
@@ -157,12 +161,12 @@ def more_skumaviek():
 
 def less_skumaviek():
     global skumavky
-    if skumavky > 3 and n_farby*gulicky < skumavky*5 - 5:
+    if skumavky > 3 and n_farby*gulicky < skumavky*6 - 6 and skumavky > n_farby:
         skumavky -= 1
 
 def more_guliciek():
     global gulicky
-    if gulicky < 6 and n_farby*gulicky < skumavky*5 - 5:
+    if gulicky < 6 and n_farby*gulicky < skumavky*6 - 6:
         gulicky += 1
 
 def less_guliciek():
@@ -172,7 +176,7 @@ def less_guliciek():
 
 def more_farby():
     global n_farby
-    if n_farby < 7 and n_farby*gulicky < skumavky*5 - 5:
+    if n_farby < 7 and n_farby*gulicky < skumavky*6 - 6 and n_farby < skumavky:
         n_farby += 1
 
 def less_farby():
@@ -184,9 +188,9 @@ game = Game()
 skumavky = 4
 gulicky = 5
 n_farby = 3
+rekord = 999
 
 font = pygame.font.Font(None, 50)
-font_b = pygame.font.Font(None, 52)
 font_m = pygame.font.Font(None, 20)
 sipka_left = pygame.image.load("sipka nalavo.png")
 sipka_right = pygame.image.load("sipka napravo.png")
@@ -238,13 +242,15 @@ while running:
     screen.blit(font.render(str(n_farby), False, (255, 255, 255)), (415, 450))
     screen.blit(font_m.render("farby", False, (255, 255, 255)), (407, 425))
     screen.blit(font_m.render("turns: " + str(game.turn), False, (255, 255, 255)), (550, 45))
-    screen.blit(font_m.render("time: " + str(int(time() - game.time)), False, (255, 255, 255)), (550, 65))
+    screen.blit(font_m.render("time: " + str(min(rekord, int(time() - game.time))), False, (255, 255, 255)), (550, 65))
 
     if game.check_win():
         #rekord = int(time() - game.time)
         #game.time = time() - (time() - rekord)
+        screen.blit(font.render("YOU WON!!!", False, (10, 10, 10)), (248, 223))
+        screen.blit(font.render("YOU WON!!!", False, (10, 10, 10)), (251, 226))
         screen.blit(font.render("YOU WON!!!", False, (200, 200, 50)), (250, 225))
-        screen.blit(font_b.render("YOU WON!!!", False, (10, 10, 10)), (248, 224))
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
